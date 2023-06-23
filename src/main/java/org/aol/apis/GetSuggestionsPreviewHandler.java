@@ -3,18 +3,21 @@ package org.aol.apis;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.LambdaLogger;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
+import lombok.SneakyThrows;
+import org.aol.dependencies.ImageSuggestionFetcher;
 import org.aol.models.*;
 import org.aol.models.enums.PostContext;
 import org.aol.models.enums.PostStatus;
 import org.joda.time.DateTime;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
 public class GetSuggestionsPreviewHandler implements RequestHandler<GetSuggestionsPreviewRequest, SuggestionsPreviewResponse> {
 
+    public ImageSuggestionFetcher imageSuggestionFetcher = new ImageSuggestionFetcher();
+
+    @SneakyThrows
     @Override
     public SuggestionsPreviewResponse handleRequest(GetSuggestionsPreviewRequest input, Context context) {
         Post originalPost = Post.builder().imageLink(input.getImageS3URL())
@@ -34,7 +37,7 @@ public class GetSuggestionsPreviewHandler implements RequestHandler<GetSuggestio
         // Invoke ChatGPT API call here
 
         // Fetch images if required here
-        //ImageSuggestionsFetcher.fetch(input);
+        String [] imageURLs = imageSuggestionFetcher.fetchImageURLs("meditation");
 
         // Combine output and create Generated Post object
         // (images, texts).forearch(postList)
