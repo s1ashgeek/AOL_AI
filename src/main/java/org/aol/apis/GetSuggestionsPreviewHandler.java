@@ -1,6 +1,7 @@
 package org.aol.apis;
 
 import com.amazonaws.services.lambda.runtime.Context;
+import com.amazonaws.services.lambda.runtime.LambdaLogger;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 import org.aol.models.*;
 import org.aol.models.enums.PostContext;
@@ -19,23 +20,33 @@ public class GetSuggestionsPreviewHandler implements RequestHandler<GetSuggestio
         Post originalPost = Post.builder().imageLink(input.getImageS3URL())
                 .textSuggestion(input.getText())
                 .postStatus(PostStatus.ORIGINAL)
-                .postMetadata(PostMetadata.builder().postContext(PostContext.SKY).Timestamp(DateTime.now()).build())
+                .postMetadata(PostMetadata.builder().postContext(input.getPostContext()).Timestamp(DateTime.now()).build())
                 .build();
 
+        LambdaLogger logger = context.getLogger();
+        logger.log("Input text: " + input.getText());
+        logger.log("Input userMetadata: " + input.getUserMetadata());
+        logger.log("Input context: " + input.getPostContext());
+        logger.log("OriginalPost: " + originalPost);
 
         // Fetch the Prompt from Dynamo DB here.
 
         // Invoke ChatGPT API call here
 
         // Fetch images if required here
+        //ImageSuggestionsFetcher.fetch(input);
 
         // Combine output and create Generated Post object
+        // (images, texts).forearch(postList)
+        //
+
 //        GeneratedPosts generatedPosts = GeneratedPosts.builder()
 //                .PostId_UserId("123_456")
 //                .PostContext_Timestamp(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss")))
 //                .GeneratedPosts(postList)
 //                .UserInput(input)
 //                .build();
+        //)
 
 
         // Save Generated Post to Dynamo DB here
@@ -44,7 +55,8 @@ public class GetSuggestionsPreviewHandler implements RequestHandler<GetSuggestio
         List<Post> postList = new ArrayList<>();
         postList.add(originalPost); // Replace with generated posts
 
-        SuggestionsPreviewResponse suggestionsPreviewResponse = SuggestionsPreviewResponse.builder().posts(postList).build();
+        SuggestionsPreviewResponse suggestionsPreviewResponse = SuggestionsPreviewResponse.builder().posts(postList)
+                .build();
 
         return suggestionsPreviewResponse;
     }
