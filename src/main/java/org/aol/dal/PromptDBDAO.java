@@ -26,7 +26,7 @@ public class PromptDBDAO {
     private static String PROMPT_TEXT = "PromptText";
     private static Logger logger = LoggerFactory.getLogger(PromptDBDAO.class);
 
-    private String getPrompt(String promptKey) {
+    public String getPrompt(String promptKey) {
         HashMap<String,AttributeValue> keyToGet = new HashMap<>();
         keyToGet.put(PRIMARY_KEY, AttributeValue.builder().s(promptKey).build());
 

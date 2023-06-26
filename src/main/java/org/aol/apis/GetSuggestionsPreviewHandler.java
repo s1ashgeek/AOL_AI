@@ -4,6 +4,8 @@ import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.LambdaLogger;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 import lombok.SneakyThrows;
+import org.aol.dal.PromptDBDAO;
+import org.aol.dependencies.DynamoDBFactory;
 import org.aol.dependencies.ImageSuggestionFetcher;
 import org.aol.models.*;
 import org.aol.models.enums.PostContext;
@@ -11,6 +13,7 @@ import org.aol.models.enums.PostStatus;
 import org.joda.time.DateTime;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class GetSuggestionsPreviewHandler implements RequestHandler<GetSuggestionsPreviewRequest, SuggestionsPreviewResponse> {
@@ -27,17 +30,19 @@ public class GetSuggestionsPreviewHandler implements RequestHandler<GetSuggestio
                 .build();
 
         LambdaLogger logger = context.getLogger();
-        logger.log("Input text: " + input.getText());
-        logger.log("Input userMetadata: " + input.getUserMetadata());
         logger.log("Input context: " + input.getPostContext());
-        logger.log("OriginalPost: " + originalPost);
 
-        // Fetch the Prompt from Dynamo DB here.
+        PromptDBDAO promptDBDAO = new PromptDBDAO(DynamoDBFactory.AmazonDynamoDBClient());
+        String promptText = promptDBDAO.getPrompt(input.getPostContext().toString());
+        logger.log("Prompt text: " + promptText + "\n");
 
         // Invoke ChatGPT API call here
 
-        // Fetch images if required here
-        String [] imageURLs = imageSuggestionFetcher.fetchImageURLs("meditation");
+        //Fetch images
+        if (input.getImageS3URL() == null || input.getImageS3URL().isEmpty()) {
+            String[] imageURLs = imageSuggestionFetcher.fetchImageURLs("cultural celebrations");
+            Arrays.stream(imageURLs).forEach(imageURL -> logger.log("ImageURL: " + imageURL + "\n"));
+        }
 
         // Combine output and create Generated Post object
         // (images, texts).forearch(postList)
