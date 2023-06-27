@@ -18,7 +18,7 @@ This class will call the Open AI to get the generated text.
 public class TextSuggestionFetcher {
 
     // Move the below secret to key vault and fetch from key vault. Not sure of key vault equivalent in AWS.
-    private static final String apiKey = "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";
+    private static final String apiKey = "text123";
     private static final String apiUrl = "https://api.openai.com/v1/engines/text-davinci-003/completions";
     private static double temperature = 0.83;
     private static final int maxTokens = 3671;
