@@ -12,10 +12,9 @@ import java.net.URL;
 @NoArgsConstructor
 public class ImageSuggestionFetcher {
   private static final String PEXELS_API_URL = "https://api.pexels.com/v1/search";
-  private static final int NUM_PHOTOS_PER_PAGE = 5;
+  private static final int NUM_PHOTOS_PER_PAGE = 1;
   private static final String AUTHORIZATION_HEADER = "Authorization";
   private static final String API_KEY = "etGMtSD8K8TdDM4Kxun9o62vQUN1K2oeaOhsCrPDnRe0mZu3IbfwOoCD";
-
 
   public String[] fetchImageURLs(String context) throws IOException {
     URL url = new URL(PEXELS_API_URL + "?query=" + context + "&per_page=" + NUM_PHOTOS_PER_PAGE);

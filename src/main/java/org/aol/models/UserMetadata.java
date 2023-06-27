@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 public class UserMetadata {
+    private String userId;
     private String deviceId;
     private String ip;
     private String email;

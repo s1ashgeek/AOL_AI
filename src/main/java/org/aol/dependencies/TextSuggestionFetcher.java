@@ -18,7 +18,7 @@ This class will call the Open AI to get the generated text.
 public class TextSuggestionFetcher {
 
     // Move the below secret to key vault and fetch from key vault. Not sure of key vault equivalent in AWS.
-    private static final String apiKey = "text123";
+    private static final String apiKey = "dummyKey";
     private static final String apiUrl = "https://api.openai.com/v1/engines/text-davinci-003/completions";
     private static double temperature = 0.83;
     private static final int maxTokens = 3671;
@@ -36,14 +36,14 @@ public class TextSuggestionFetcher {
 
     public String GetOpenAISuggestions(String prompt) {
         try {
-            logger.log("starting GetOpenAISuggestions method");
+            logger.log("starting GetOpenAISuggestions method\n");
             HttpClient httpClient = HttpClients.createDefault();
             HttpPost httpPost = new HttpPost(apiUrl);
 
             httpPost.setHeader(HttpHeaders.CONTENT_TYPE, "application/json");
             httpPost.setHeader("Authorization", "Bearer " + apiKey);
 
-            logger.log("Prompt message sent to Open AI is " + prompt);
+            logger.log("Prompt message sent to Open AI is " + prompt + "\n");
 
             StringEntity requestEntity = new StringEntity(
                     "{\"prompt\":\"" + prompt + "\",\"temperature\":" + temperature +
@@ -52,15 +52,16 @@ public class TextSuggestionFetcher {
                             ",\"best_of\":" + bestOf + "}", "UTF-8");
 
             httpPost.setEntity(requestEntity);
-            logger.log("Calling OPenAI APIs using HttpClient");
+            logger.log("Calling OpenAI APIs using HttpClient \n");
             HttpResponse response = httpClient.execute(httpPost);
             HttpEntity responseEntity = response.getEntity();
-            logger.log("Got response from OPenAI APIs is " + responseEntity);
+            logger.log("Got response from OpenAI APIs: " + responseEntity + "\n");
             if (responseEntity != null) {
                 String responseBody = EntityUtils.toString(responseEntity);
                 ObjectMapper objectMapper = new ObjectMapper();
                 JsonNode jsonNode = objectMapper.readTree(responseBody);
 
+                logger.log("JSON object for response: " + jsonNode.asText() + "\n");
                 if (jsonNode.has("choices")) {
                     JsonNode choicesNode = jsonNode.get("choices");
 
@@ -75,9 +76,12 @@ public class TextSuggestionFetcher {
                 }
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.log("Error calling OpenAPI: " + e + "\n");
+        } catch (Exception e) {
+            logger.log("Error calling OpenAPI: " + e + "\n");
         }
-        logger.log("There is some error in Open AI call and returning same response as user");
+
+        logger.log("There is some error in Open AI call and returning same response as user \n\n");
         return prompt;
     }
 }

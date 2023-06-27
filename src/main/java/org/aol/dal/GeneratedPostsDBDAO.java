@@ -23,14 +23,14 @@ import java.util.Map;
 @AllArgsConstructor
 public class GeneratedPostsDBDAO {
     private DynamoDbClient ddbClient;
-    private static String TABLE_NAME = "GeneratedPostsDB";
+    private static String TABLE_NAME = "GeneratedPosts";
     private static String PRIMARY_KEY_POST = "PostId_UserId";
     private static String SORT_KEY_CONTEXT_TIMESTAMP = "PostContext_Timestamp";
     private static String GENERATED_POSTS = "GeneratedPosts";
     private static String USER_INPUT = "UserInput";
     private static Logger logger = LoggerFactory.getLogger(GeneratedPostsDBDAO.class);
 
-    private void putGeneratedPosts(GeneratedPosts generatedPosts) {
+    public void saveGeneratedPosts(GeneratedPosts generatedPosts) {
         Map<String, AttributeValue> item = new HashMap<>();
         ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
 
