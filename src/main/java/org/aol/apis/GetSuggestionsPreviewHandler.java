@@ -7,11 +7,15 @@ import lombok.SneakyThrows;
 import org.aol.dal.PromptDBDAO;
 import org.aol.dependencies.DynamoDBFactory;
 import org.aol.dependencies.ImageSuggestionFetcher;
+import org.aol.dependencies.TextSuggestionFetcher;
 import org.aol.models.*;
 import org.aol.models.enums.PostContext;
 import org.aol.models.enums.PostStatus;
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -37,32 +41,41 @@ public class GetSuggestionsPreviewHandler implements RequestHandler<GetSuggestio
         logger.log("Prompt text: " + promptText + "\n");
 
         // Invoke ChatGPT API call here
+        TextSuggestionFetcher textSuggestionFetcher = new TextSuggestionFetcher(logger,input.getCreativity());
+        String OpenAISuggestion = textSuggestionFetcher.GetOpenAISuggestions(input.getText() +" " + promptText);
 
         //Fetch images
+        String gptimageURL = input.getImageS3URL();
         if (input.getImageS3URL() == null || input.getImageS3URL().isEmpty()) {
             String[] imageURLs = imageSuggestionFetcher.fetchImageURLs("cultural celebrations");
             Arrays.stream(imageURLs).forEach(imageURL -> logger.log("ImageURL: " + imageURL + "\n"));
+            gptimageURL = imageURLs.length >= 1? imageURLs[0] : input.getImageS3URL();
         }
 
-        // Combine output and create Generated Post object
-        // (images, texts).forearch(postList)
-        //
+        // Combine Image and post here.
+        // Here we are considering only 1st image to be combined with text. If we want multiple suggestions
+        // then we need to call Open AI API multiple times which can be done iteratively.
+         Post gpt_suggestedpost = Post.builder().imageLink(gptimageURL)
+                .textSuggestion(OpenAISuggestion)
+                .postStatus(PostStatus.GPT_SUGGESTED)
+                .postMetadata(PostMetadata.builder().postContext(PostContext.WCF).Timestamp(DateTime.now(DateTimeZone.UTC)).build())
+                .build();
+        List<Post> postList = new ArrayList<>();
+        postList.add(gpt_suggestedpost);
 
-//        GeneratedPosts generatedPosts = GeneratedPosts.builder()
-//                .PostId_UserId("123_456")
-//                .PostContext_Timestamp(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss")))
-//                .GeneratedPosts(postList)
-//                .UserInput(input)
-//                .build();
-        //)
+        GeneratedPosts generatedPosts = GeneratedPosts.builder()
+                .postId_UserId("123_456") // We need to collect User information like device Id to populate this. Need to make changes to GetSuggestionsPreviewRequest obj.
+                .postContext_Timestamp(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss")))
+                .generatedPosts(postList)
+                .userInput(originalPost)
+                .build();
+        // Save Generated Post to Dynamo DB here
 
 
         // Save Generated Post to Dynamo DB here
 
         // Return the Generated Post to the client here
-        List<Post> postList = new ArrayList<>();
-        postList.add(originalPost); // Replace with generated posts
-
+        postList.add(originalPost);
         SuggestionsPreviewResponse suggestionsPreviewResponse = SuggestionsPreviewResponse.builder().posts(postList)
                 .build();
 
