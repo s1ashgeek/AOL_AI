@@ -3,6 +3,7 @@ package org.aol.dependencies;
 import java.io.IOException;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHeaders;
+import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
@@ -18,7 +19,7 @@ This class will call the Open AI to get the generated text.
 public class TextSuggestionFetcher {
 
     // Move the below secret to key vault and fetch from key vault. Not sure of key vault equivalent in AWS.
-    private static final String apiKey = "dummyKey";
+    private static final String apiKey = "dummyKEY";
     private static final String apiUrl = "https://api.openai.com/v1/engines/text-davinci-003/completions";
     private static double temperature = 0.83;
     private static final int maxTokens = 3671;
@@ -42,6 +43,8 @@ public class TextSuggestionFetcher {
 
             httpPost.setHeader(HttpHeaders.CONTENT_TYPE, "application/json");
             httpPost.setHeader("Authorization", "Bearer " + apiKey);
+
+            prompt = prompt.replace("\"", "\\\"").replace("\n", "\\n");
 
             logger.log("Prompt message sent to Open AI is " + prompt + "\n");
 
